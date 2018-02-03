@@ -2923,8 +2923,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void onConfigurationChanged() {
         final Resources res = mContext.getResources();
 
-        mStatusBarHeight =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+        mStatusBarHeight = 244;
 
         // Height of the navigation bar when presented horizontally at bottom
         mNavigationBarHeightForRotationDefault[mPortraitRotation] =

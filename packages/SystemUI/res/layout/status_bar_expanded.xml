@@ -21,6 +21,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/notification_panel"
+    android:layout_marginTop="160px"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
@@ -50,6 +51,7 @@
 
         <com.android.systemui.statusbar.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"
+            android:layout_marginTop="160px"
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
             android:layout_gravity="@integer/notification_panel_layout_gravity"

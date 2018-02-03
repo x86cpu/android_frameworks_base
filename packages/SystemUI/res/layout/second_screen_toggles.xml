@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+<ImageView
+    android:id="@+id/bluetooth"
+    android:layout_width="32dp" 
+    android:layout_height="32dp"
+    android:src="@drawable/bluetooth" />
+
+<ImageView
+    android:id="@+id/wifi"
+    android:layout_marginLeft="50dp"
+    android:layout_marginRight="50dp"
+    android:layout_width="32dp" 
+    android:layout_height="32dp"
+    android:src="@drawable/wifi" />
+
+<ImageView
+    android:id="@+id/flashlight"
+    android:layout_width="32dp" 
+    android:layout_height="32dp"
+    android:src="@drawable/flashlight_off" />
+
+</LinearLayout>

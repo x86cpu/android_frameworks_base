@@ -87,6 +87,8 @@ public class SystemUIApplication extends Application {
         setTheme(R.style.systemui_theme);
 
         SystemUIFactory.createFromConfig(this);
+        Intent intent = new Intent(this, com.android.systemui.secondscreen.SecondScreenService.class);
+        startService(intent);
 
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             IntentFilter filter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
@@ -161,6 +163,7 @@ public class SystemUIApplication extends Application {
 
         Log.v(TAG, "Starting SystemUI services for user " +
                 Process.myUserHandle().getIdentifier() + ".");
+
         final int N = services.length;
         for (int i=0; i<N; i++) {
             Class<?> cl = services[i];
