@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 //import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentPagerAdapter;
+//import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -46,7 +47,8 @@ public class SecondScreenActivity extends FragmentActivity implements OnTouchLis
         rootView.setOnTouchListener(this);
 
         viewPager = (ViewPager) rootView.findViewById(R.id.second_screen_viewpager);
-        viewsPagerAdapter = new ViewsPagerAdapter(getFragmentManager());
+//        viewsPagerAdapter = new ViewsPagerAdapter(getFragmentManager());
+        viewsPagerAdapter = new ViewsPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(viewsPagerAdapter);
 
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_SYSTEM_ERROR, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN, PixelFormat.TRANSLUCENT);
