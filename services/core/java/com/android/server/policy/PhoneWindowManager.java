@@ -5692,6 +5692,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         + " with rotation " + rotation + ", result: " + osf);
             }
         }
+        
+        int sbHeight = 160;
+        int rotation = mDisplayRotation;
+        
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                pf.top += sbHeight;
+                break;
+            case Surface.ROTATION_90:
+                pf.left += sbHeight;
+                break;
+            case Surface.ROTATION_180:
+                pf.right -= sbHeight;
+                break;
+            case Surface.ROTATION_270:
+                pf.bottom -= sbHeight;
+                break;
+        }
 
         if (DEBUG_LAYOUT) Slog.v(TAG, "Compute frame " + attrs.getTitle()
                 + ": sim=#" + Integer.toHexString(sim)
