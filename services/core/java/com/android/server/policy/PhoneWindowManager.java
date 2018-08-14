@@ -16,134 +16,11 @@
 
 package com.android.server.policy;
 
-import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
-import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
-import static android.app.ActivityManager.StackId.DOCKED_STACK_ID;
-import static android.app.ActivityManager.StackId.FREEFORM_WORKSPACE_STACK_ID;
-import static android.app.ActivityManager.StackId.HOME_STACK_ID;
-import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
-import static android.app.AppOpsManager.OP_TOAST_WINDOW;
-import static android.content.Context.CONTEXT_RESTRICTED;
-import static android.content.Context.DISPLAY_SERVICE;
-import static android.content.Context.WINDOW_SERVICE;
-import static android.content.pm.PackageManager.FEATURE_LEANBACK;
-import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
-import static android.content.pm.PackageManager.FEATURE_WATCH;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.content.res.Configuration.EMPTY;
-import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
-import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
-import static android.os.Build.VERSION_CODES.M;
-import static android.os.Build.VERSION_CODES.O;
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.STATE_OFF;
-import static android.view.WindowManager.DOCKED_LEFT;
-import static android.view.WindowManager.DOCKED_RIGHT;
-import static android.view.WindowManager.DOCKED_TOP;
-import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
-import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
-import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_ATTACHED_IN_DECOR;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
-import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
-import static android.view.WindowManager.LayoutParams.LAST_SYSTEM_WINDOW;
-import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NAV_HIDE_FORCED;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_HIDE_FORCED;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WAS_NOT_FULLSCREEN;
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
-import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
-import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
-import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_PHONE;
-import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
-import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
-import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
-import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
-import static android.view.WindowManager.LayoutParams.TYPE_QS_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
-import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
-import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
-import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
-import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
-import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
-import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
-import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
-import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
-import static android.view.WindowManagerGlobal.ADD_OKAY;
-import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
-import static android.view.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
-
 import android.annotation.Nullable;
-import android.app.ActivityManager;
+import android.app.*;
 import android.app.ActivityManager.StackId;
-import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.SleepToken;
-import android.app.ActivityManagerNative;
-import android.app.ActivityThread;
-import android.app.AlarmManager;
-import android.app.AppOpsManager;
-import android.app.IUiModeManager;
-import android.app.PendingIntent;
-import android.app.ProgressDialog;
-import android.app.SearchManager;
-import android.app.StatusBarManager;
-import android.app.UiModeManager;
-import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
+import android.content.*;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -171,27 +48,8 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.FactoryTest;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.IDeviceIdleController;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Messenger;
-import android.os.PowerManager;
-import android.os.PowerManagerInternal;
+import android.os.*;
 import android.os.Process;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.SystemClock;
-import android.os.SystemProperties;
-import android.os.UEventObserver;
-import android.os.UserHandle;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
@@ -200,37 +58,11 @@ import android.service.dreams.IDreamManager;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
-import android.util.DisplayMetrics;
-import android.util.EventLog;
-import android.util.Log;
-import android.util.LongSparseArray;
-import android.util.MutableBoolean;
-import android.util.Slog;
-import android.util.SparseArray;
-import android.view.Display;
-import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
-import android.view.IApplicationToken;
-import android.view.IWindowManager;
-import android.view.InputChannel;
-import android.view.InputDevice;
-import android.view.InputEvent;
-import android.view.InputEventReceiver;
-import android.view.KeyCharacterMap;
+import android.util.*;
+import android.view.*;
 import android.view.KeyCharacterMap.FallbackAction;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.PointerIcon;
-import android.view.Surface;
-import android.view.View;
-import android.view.ViewConfiguration;
-import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
-import android.view.WindowManagerGlobal;
-import android.view.WindowManagerInternal;
+import android.view.WindowManager.*;
 import android.view.WindowManagerInternal.AppTransitionListener;
-import android.view.WindowManagerPolicy;
-import android.view.WindowManagerPolicyControl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
@@ -239,7 +71,6 @@ import android.view.animation.AnimationUtils;
 import android.view.autofill.AutofillManagerInternal;
 import android.view.inputmethod.InputMethodManagerInternal;
 import android.widget.Toast;
-
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
@@ -259,12 +90,11 @@ import com.android.server.policy.keyguard.KeyguardStateMonitor.StateCallback;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.AppTransition;
-
+import dalvik.system.PathClassLoader;
 import lineageos.hardware.LineageHardwareManager;
 import lineageos.providers.LineageSettings;
-
+import org.lineageos.internal.buttons.LineageButtons;
 import org.lineageos.internal.util.ActionUtils;
-import static org.lineageos.internal.util.DeviceKeysConstants.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -274,9 +104,24 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lineageos.internal.buttons.LineageButtons;
-
-import dalvik.system.PathClassLoader;
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
+import static android.app.ActivityManager.StackId.*;
+import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
+import static android.app.AppOpsManager.OP_TOAST_WINDOW;
+import static android.content.Context.*;
+import static android.content.pm.PackageManager.*;
+import static android.content.res.Configuration.*;
+import static android.os.Build.VERSION_CODES.M;
+import static android.os.Build.VERSION_CODES.O;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.STATE_OFF;
+import static android.view.WindowManager.*;
+import static android.view.WindowManager.LayoutParams.*;
+import static android.view.WindowManagerGlobal.ADD_OKAY;
+import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
+import static android.view.WindowManagerPolicy.WindowManagerFuncs.*;
+import static org.lineageos.internal.util.DeviceKeysConstants.*;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -486,6 +331,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int[] mNavigationBarWidthForRotationDefault = new int[4];
     int[] mNavigationBarHeightForRotationInCarMode = new int[4];
     int[] mNavigationBarWidthForRotationInCarMode = new int[4];
+
+    WindowState mSignBoard = null;
 
     private LongSparseArray<IShortcutService> mShortcutKeyServices = new LongSparseArray<>();
 
@@ -2867,7 +2714,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (!((type >= FIRST_APPLICATION_WINDOW && type <= LAST_APPLICATION_WINDOW)
                 || (type >= FIRST_SUB_WINDOW && type <= LAST_SUB_WINDOW)
-                || (type >= FIRST_SYSTEM_WINDOW && type <= LAST_SYSTEM_WINDOW))) {
+                || (type >= FIRST_SYSTEM_WINDOW && type <= LAST_SYSTEM_WINDOW)
+                || (type >= FIRST_SIGNBOARD_WINDOW && type <= LAST_SIGNBOARD_WINDOW))) {
             return WindowManagerGlobal.ADD_INVALID_TYPE;
         }
 
@@ -2893,6 +2741,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case TYPE_VOICE_INTERACTION:
                 case TYPE_ACCESSIBILITY_OVERLAY:
                 case TYPE_QS_DIALOG:
+                case TYPE_SIGNBOARD_NORMAL:
                     // The window manager will check these.
                     return ADD_OKAY;
             }
@@ -2977,6 +2826,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_DISPLAY_OVERLAY:
             case TYPE_INPUT_CONSUMER:
             case TYPE_KEYGUARD_DIALOG:
+            case TYPE_SIGNBOARD_NORMAL:
             case TYPE_MAGNIFICATION_OVERLAY:
             case TYPE_NAVIGATION_BAR:
             case TYPE_NAVIGATION_BAR_PANEL:
@@ -3158,15 +3008,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation, int uiMode,
             int displayId) {
+        int sbHeight = Resources.getSystem().getDimensionPixelSize(R.dimen.config_signBoardHeight);
+        boolean portrait = rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180;
         // TODO(multi-display): Support navigation bar on secondary displays.
         if (displayId == DEFAULT_DISPLAY && hasNavigationBar()) {
             // For a basic navigation bar, when we are in landscape mode we place
             // the navigation bar to the side.
             if (mNavigationBarCanMove && fullWidth > fullHeight) {
-                return fullWidth - getNavigationBarWidth(rotation, uiMode);
+                return fullWidth - getNavigationBarWidth(rotation, uiMode) - (portrait ? 0 : sbHeight);
             }
         }
-        return fullWidth;
+        return fullWidth - (portrait ? 0 : sbHeight);
     }
 
     private int getNavigationBarHeight(int rotation, int uiMode) {
@@ -3180,15 +3032,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation, int uiMode,
             int displayId) {
+        int sbHeight = Resources.getSystem().getDimensionPixelSize(R.dimen.config_signBoardHeight);
+        boolean portrait = rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180;
         // TODO(multi-display): Support navigation bar on secondary displays.
         if (displayId == DEFAULT_DISPLAY && hasNavigationBar()) {
             // For a basic navigation bar, when we are in portrait mode we place
             // the navigation bar to the bottom.
             if (!mNavigationBarCanMove || fullWidth < fullHeight) {
-                return fullHeight - getNavigationBarHeight(rotation, uiMode);
+                return fullHeight - getNavigationBarHeight(rotation, uiMode) - (portrait ? sbHeight : 0);
             }
         }
-        return fullHeight;
+        return fullHeight - (portrait ? sbHeight : 0);
     }
 
     @Override
@@ -3222,6 +3076,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         switch (win.getAttrs().type) {
             case TYPE_STATUS_BAR:
             case TYPE_NAVIGATION_BAR:
+            case TYPE_SIGNBOARD_NORMAL:
             case TYPE_WALLPAPER:
             case TYPE_DREAM:
                 return false;
@@ -3488,6 +3343,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mNavigationBarController.setOnBarVisibilityChangedListener(
                         mNavBarVisibilityListener, true);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
+                break;
+            case TYPE_SIGNBOARD_NORMAL:
+                mSignBoard = win;
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
             case TYPE_STATUS_BAR_PANEL:
@@ -5402,6 +5260,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void layoutWindowLw(WindowState win, WindowState attached) {
         // We've already done the navigation bar and status bar. If the status bar can receive
         // input, we need to layout it again to accomodate for the IME window.
+        
         if ((win == mStatusBar && !canReceiveInput(win)) || win == mNavigationBar) {
             return;
         }
@@ -5908,7 +5767,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        if (DEBUG_LAYOUT) Slog.v(TAG, "Compute frame " + attrs.getTitle()
+        if (DEBUG_LAYOUT) Slog.e(TAG, "Compute frame " + attrs.getTitle()
                 + ": sim=#" + Integer.toHexString(sim)
                 + " attach=" + attached + " type=" + attrs.type
                 + String.format(" flags=0x%08x", fl)
@@ -5919,7 +5778,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + " sf=" + sf.toShortString()
                 + " osf=" + (osf == null ? "null" : osf.toShortString()));
 
-        win.computeFrameLw(pf, df, of, cf, vf, dcf, sf, osf);
+        if (!layoutWindowLwCustom(win)) win.computeFrameLw(pf, df, of, cf, vf, dcf, sf, osf);
 
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
@@ -5932,6 +5791,34 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 && !win.getGivenInsetsPendingLw()) {
             offsetVoiceInputWindowLw(win);
         }
+    }
+
+    private boolean layoutWindowLwCustom(WindowState win) {
+        if (win.getAttrs().type == TYPE_SIGNBOARD_NORMAL && Resources.getSystem().getBoolean(R.bool.config_enableSignBoard)) {
+            Rect rect = new Rect();
+            int sbHeight = Resources.getSystem().getDimensionPixelSize(R.dimen.config_signBoardHeight);
+
+            switch (mDisplayRotation) {
+                case Surface.ROTATION_0:
+                    rect.set(400, -sbHeight, mOverscanScreenWidth, 0);
+                    break;
+                case Surface.ROTATION_90:
+                    rect.set(-sbHeight, 0, 0, mOverscanScreenHeight - 400);
+                    break;
+                case Surface.ROTATION_180:
+                    rect.set(0, mOverscanScreenHeight, mOverscanScreenWidth - 400, mOverscanScreenHeight + sbHeight);
+                    break;
+                case Surface.ROTATION_270:
+                    rect.set(mOverscanScreenWidth, 400, mOverscanScreenWidth + sbHeight, mOverscanScreenHeight);
+                    break;
+            }
+
+            win.computeFrameLw(rect, rect, rect, rect, rect, rect, rect, rect);
+
+            return true;
+        }
+
+        return false;
     }
 
     private void layoutWallpaper(WindowState win, Rect pf, Rect df, Rect of, Rect cf) {
